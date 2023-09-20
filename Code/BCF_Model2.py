@@ -140,14 +140,14 @@ class nnpde_informed():
         
         #experts
         
-        loss_1_1 = tf.reduce_mean(tf.square(fpde_e))
-        loss_1 = tf.reduce_mean(tf.square(loss_1_1))  
+        
+        loss_1 = tf.reduce_mean(tf.square(tf.reduce_mean(tf.square(fpde_e))))  + tf.reduce_mean(tf.square(tf.nn.relu(-jE))) 
         
         loss_2 = tf.reduce_mean(tf.square(jE - j0_e))
 
         #households
         loss_3 = tf.reduce_mean(tf.square(jH - j0_h)) 
-        loss_4 = tf.reduce_mean(tf.square(fpde_h))
+        loss_4 = tf.reduce_mean(tf.square(fpde_h)) + tf.reduce_mean(tf.square(tf.nn.relu(-jH))) 
 
         
         loss = loss_1 + loss_2 + loss_3 + loss_4 
@@ -316,7 +316,7 @@ class model_nnpde():
     def equations_region2(self,q_p,sig_qk_p,sig_qf_p,Chi_p_old,zi,fi):
         error = 100
         iter = 1
-        while error>0.00001 or iter<10: 
+        while error>0.001 or iter<10: 
             i_p = (q_p-1)/self.params['kappa']
             eq1 = self.params['rho'] * q_p  - (self.f[fi] - i_p)
             eq2 = sig_qk_p - sig_qk_p*(Chi_p_old-self.z_mat[zi,fi])/self.dz[zi-1] + (sig_qk_p)*self.q[zi-1,fi]/(q_p*self.dz[zi-1])*(Chi_p_old - self.z_mat[zi,fi]) - self.params['sigma']
